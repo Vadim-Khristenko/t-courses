@@ -1,3 +1,4 @@
+import datetime
 from typing import Any, Optional
 
 from loguru import logger
@@ -20,6 +21,7 @@ class User(KeyVal):
         self.email = email
         self.password = password
         self.data_keyval = MongoKeyVal(login, database["data"])
+        self.meta_keyval = MongoKeyVal(login, database["meta"])
         self.tags_keyval = MongoKeyVal(login, database["tags"])
 
     @staticmethod
@@ -65,7 +67,12 @@ class User(KeyVal):
         return [key for key, value in self.tags_keyval.get_items() if value]
 
     def on_login(self):
-        pass
+        log_cnt = self.meta_keyval.get_field("log_cnt")
+        if log_cnt is None:
+            log_cnt = 0
+        self.meta_keyval.push_fields(
+            {"log_cnt": log_cnt + 1, "last_log": datetime.datetime.now()}
+        )
 
     def get_password(self) -> str:
         return self.password
