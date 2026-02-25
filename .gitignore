@@ -1,5 +1,6 @@
 .venv
 .idea
-secrets/.env
+secrets/production.env
+secrets/test.env
 __pycache__/
 configs
