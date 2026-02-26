@@ -39,7 +39,7 @@ class ApiAuth:
         user = self._user_storage.login(creds.login, creds.password)
         if user is not None:
             user.on_login()
-            cookie = self._auth_storage.get_or_create_cookie(creds.login)
+            cookie = self._auth_storage.new_cookie(creds.login)
             response = JSONResponse(
                 FormResponse(success=True, reload=True).model_dump()
             )

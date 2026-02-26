@@ -1,9 +1,13 @@
 import secrets
+from datetime import datetime, timezone
 from typing import Optional
 
-from cachetools import TTLCache
+from pymongo import ReturnDocument
+from pymongo.collection import Collection
 
 COOKIE_TTL = 60 * 60 * 24
+
+UPDATE_AT_FIELD = "update_at"
 
 
 def gen_secret() -> str:
@@ -11,23 +15,32 @@ def gen_secret() -> str:
 
 
 class AuthStorage:
-    def __init__(self):
-        self._login_by_cookie: TTLCache[str, str] = TTLCache(
-            maxsize=10000, ttl=COOKIE_TTL
-        )
+    def __init__(self, collection: Collection) -> None:
+        self.collection = collection
+        self.collection.create_index(UPDATE_AT_FIELD, expireAfterSeconds=COOKIE_TTL)
 
     def check_cookie(self, cookie: Optional[str]) -> Optional[str]:
         if cookie is None:
             return None
-        result = self._login_by_cookie.get(cookie, None)
-        if result is not None:
-            self._login_by_cookie[cookie] = result  # do not forget to refresh
-        return result
+        result = self.collection.find_one_and_update(
+            {"_id": cookie},
+            {"$set": {UPDATE_AT_FIELD: datetime.now(timezone.utc)}},
+            return_document=ReturnDocument.AFTER,
+        )
+        if result is None:
+            return None
+        return result["login"]
 
     def pop_cookie(self, cookie: str):
-        self._login_by_cookie.pop(cookie, None)
+        self.collection.delete_one({"_id": cookie})
 
-    def get_or_create_cookie(self, login: str) -> str:
+    def new_cookie(self, login: str) -> str:
         cookie = gen_secret()
-        self._login_by_cookie[cookie] = login
+        self.collection.insert_one(
+            {
+                "_id": cookie,
+                "login": login,
+                UPDATE_AT_FIELD: datetime.now(timezone.utc),
+            }
+        )
         return cookie

@@ -3,7 +3,6 @@ fastapi~=0.120.1
 PyMySQL~=1.1.2
 pydantic~=2.12.3
 loguru~=0.7.3
-cachetools~=6.2.1
 uvicorn
 aiohttp~=3.13.1
 botocore~=1.40.49

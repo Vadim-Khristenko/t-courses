@@ -46,7 +46,7 @@ MONGO_URI = os.environ["MONGO_URI"]
 mongo_client = MongoClient(MONGO_URI)
 database = mongo_client["t-courses-v1_0"]
 
-auth_storage = AuthStorage()
+auth_storage = AuthStorage(database["cookies"])
 user_storage = UserStorage(database)
 
 
