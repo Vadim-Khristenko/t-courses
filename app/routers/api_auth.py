@@ -43,5 +43,5 @@ class ApiAuth:
             response = JSONResponse(
                 FormResponse(success=True, reload=True).model_dump()
             )
-            return UserSession(session_id=cookie).update_cookie(response)
+            return UserSession.set_cookie(cookie, response)
         return FormResponse(success=False, detail="Неверный логин или пароль")

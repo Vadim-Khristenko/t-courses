@@ -3,8 +3,6 @@ from typing import Optional
 
 from cachetools import TTLCache
 
-from app.engine.singleton import Singleton
-
 COOKIE_TTL = 60 * 60 * 24
 
 
@@ -12,7 +10,7 @@ def gen_secret() -> str:
     return secrets.token_urlsafe(32)
 
 
-class AuthStorage(metaclass=Singleton):
+class AuthStorage:
     def __init__(self):
         self._login_by_cookie: TTLCache[str, str] = TTLCache(
             maxsize=10000, ttl=COOKIE_TTL

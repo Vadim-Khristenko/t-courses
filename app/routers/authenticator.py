@@ -5,7 +5,6 @@ from typing import Optional
 import aiohttp
 from fastapi import Cookie, HTTPException
 from fastapi.responses import Response
-from loguru import logger
 from starlette.requests import Request
 
 from app.engine.auth_storage import AuthStorage, COOKIE_TTL
@@ -16,14 +15,14 @@ SMARTCAPTCHA_SERVER_KEY = os.environ["SMARTCAPTCHA_SERVER_KEY"]
 
 SESSION_COOKIE = "session_id"
 
-auth_storage = AuthStorage()
-user_storage = UserStorage()
-
 
 class UserSession:
-    def __init__(self, session_id: Optional[str] = Cookie(None)):
+    def __init__(self, request: Request, session_id: Optional[str] = Cookie(None)):
         self.user: Optional[User] = None
         self.session_id: Optional[str] = None
+
+        auth_storage: AuthStorage = request.app.state.auth_storage
+        user_storage: UserStorage = request.app.state.user_storage
 
         login = auth_storage.check_cookie(session_id)
         user: Optional[User] = user_storage.get_user_by_login(login)
@@ -36,18 +35,21 @@ class UserSession:
         response.delete_cookie(key=SESSION_COOKIE)
         return response
 
+    @staticmethod
+    def set_cookie(cookie: str, response: Response) -> Response:
+        response.set_cookie(
+            key=SESSION_COOKIE,
+            value=cookie,
+            httponly=True,
+            max_age=COOKIE_TTL,
+            samesite="strict",
+        )
+        return response
+
     def update_cookie(self, response: Response) -> Response:
         if self.user is None or self.session_id is None:
-            UserSession.delete_cookie(response)
-        else:
-            response.set_cookie(
-                key=SESSION_COOKIE,
-                value=self.session_id,
-                httponly=True,
-                max_age=COOKIE_TTL,
-                samesite="strict",
-            )
-        return response
+            return UserSession.delete_cookie(response)
+        return UserSession.set_cookie(self.session_id, response)
 
 
 async def verify_captcha(request: Request):

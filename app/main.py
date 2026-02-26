@@ -1,9 +1,11 @@
+import os
 import time
 from datetime import datetime
 
 import dotenv
 from aiomysql import Pool
 from loguru import logger
+from pymongo import MongoClient
 from pymysql import OperationalError
 
 dotenv.load_dotenv("secrets/.env")
@@ -39,6 +41,14 @@ from app.routers.api_auth import ApiAuth
 from app.routers.api_ejudge import ApiEjudge
 from app.routers.web_home import WebHome
 
+MONGO_URI = os.environ["MONGO_URI"]
+
+mongo_client = MongoClient(MONGO_URI)
+database = mongo_client["t-courses-v1_0"]
+
+auth_storage = AuthStorage()
+user_storage = UserStorage(database)
+
 
 async def start_load(pool: Pool):
     try:
@@ -69,6 +79,9 @@ async def lifespan(app: FastAPI):
     except OperationalError as e:
         app.state.mysql_pool = None
         logger.warning(f"Mysql initialization failed! {e}")
+
+    app.state.auth_storage = auth_storage
+    app.state.user_storage = user_storage
 
     try:
         yield
@@ -102,9 +115,6 @@ app.mount(
 app.mount(
     "/files", StaticFiles(directory=config_loader.config_path / "files"), name="files"
 )
-
-auth_storage = AuthStorage()
-user_storage = UserStorage()
 
 form_renderer = FormRenderer()
 

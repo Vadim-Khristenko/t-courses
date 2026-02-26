@@ -1,24 +1,19 @@
-import os
 import time
 from typing import Optional
 
 from aiomysql import Pool
 from loguru import logger
-from pymongo import MongoClient
+from pymongo.database import Database
 
 from app.ejudge.registration import create_new_user
 from app.engine.lang import LoginGenerator
-from app.engine.singleton import Singleton
 from app.models.account import BaseAccountInfo
 from app.storage.user import User
 
-MONGO_URI = os.environ["MONGO_URI"]
 
-
-class UserStorage(metaclass=Singleton):
-    def __init__(self):
-        self.client = MongoClient(MONGO_URI)
-        self.database = self.client["t-courses-v1_0"]
+class UserStorage:
+    def __init__(self, database: Database):
+        self.database = database
 
         self.user_by_login: dict[str, User] = {}
         self.user_by_email: dict[str, User] = {}
