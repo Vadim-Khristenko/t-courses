@@ -14,6 +14,10 @@ EMAIL_SECRET_KEY = os.environ["EMAIL_SECRET_KEY"]
 async def send_email(to_address: str, login: str, password: str):
     logger.info("Sending email...)")
 
+    if len(EMAIL_SECRET_KEY) == 0 or len(EMAIL_ACCESS_KEY) == 0:
+        logger.info(f"Skipped sending email -> {to_address} {login}:{password}")
+        return
+
     data = {
         "FromEmailAddress": "info@t-edu.tech",
         "Destination": {"ToAddresses": [to_address]},

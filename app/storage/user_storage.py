@@ -41,7 +41,11 @@ class UserStorage:
 
     async def _push_ejudge(self, user: User, pool: Pool) -> None:
         name = f"{user.get_field('surname')} {user.get_field('name')}"
-        user_id = await create_new_user(user.get_login(), name, pool)
+        if pool is None:
+            logger.info("Skipping ejudge user creation...")
+            user_id = max(self.login_by_user_id.keys() | {0}) + 1
+        else:
+            user_id = await create_new_user(user.get_login(), name, pool)
         assert (
             user_id not in self.user_by_login
         ), f"{user.get_login()} got same id={user_id} as {self.login_by_user_id[user_id]}"

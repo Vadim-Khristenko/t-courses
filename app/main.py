@@ -41,9 +41,10 @@ from app.routers.api_ejudge import ApiEjudge
 from app.routers.web_home import WebHome
 
 MONGO_URI = os.environ["MONGO_URI"]
+APP_NAME = os.environ["APP_NAME"]
 
 mongo_client = MongoClient(MONGO_URI)
-database = mongo_client["t-courses-v1_0"]
+database = mongo_client[APP_NAME]
 
 auth_storage = AuthStorage(database["cookies"])
 user_storage = UserStorage(database)
