@@ -16,7 +16,7 @@ from app.models.config import Course, Page, Contest
 from app.routers.authenticator import UserSession
 from app.storage.user_storage import UserStorage
 
-UI_VERSION = "20"
+UI_VERSION = "21"
 
 
 class WebHome:

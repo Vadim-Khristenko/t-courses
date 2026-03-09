@@ -84,7 +84,6 @@ async function main() {
                     for (let i = 0; i < contest.tasks.length; i += 1) {
                         let item = contest.tasks[i];
                         let upsolving = contest.upsolving[i];
-                        const style = ""
                         if (data.contests[idx].is_acm) {
                             const good_name = (item > 0 ? 'ok' : 'upsolved')
                             const bad_name = (item === upsolving ? 'bad' : 'not_upsolved')
@@ -110,14 +109,20 @@ async function main() {
                                     penalty = penalty_val;
                                 }
                             }
-                            html += `<td class="${classname} cell-item" style="${style}" title="${text}${real_penalty}">${text}${penalty}</td>`;
+                            html += `<td class="${classname} cell-item" title="${text}${real_penalty}">${text}${penalty}</td>`;
                         } else {
-                            if (item === -1) {
-                                html += `<td class="cell-item"></td>`;
-                                continue;
+                            let contest_result = ``;
+                            if (item !== -1) {
+                                contest_result = `<div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">${item}</div> `;
                             }
-                            const classname = item === 100 ? 'ok' : 'bad';
-                            html += `<td class="${classname} cell-item" style="${style}; background-color: ${valueToColor(item)}" title="${item}">${item}</td>`;
+                            let upsolving_result = ``;
+                            if (upsolving !== item) {
+                                const diff = upsolving - Math.max(0, item);
+                                upsolving_result = `<div style="position: absolute; top: -6%; right: 0; font-size: x-small;">+${diff}</div> `;
+                            }
+
+                            let bg_color = item === -1 ? '' : valueToColor(item);
+                            html += `<td class="cell-item" style="position: relative;  background-color: ${bg_color}" title="${item}">${contest_result} ${upsolving_result}</td>`;
                         }
                     }
                 }
