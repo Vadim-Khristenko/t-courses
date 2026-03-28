@@ -1,13 +1,12 @@
-import os
-
 from fastapi import APIRouter, HTTPException
 from loguru import logger
 
+from app.config import settings
 from app.engine.auth_storage import AuthStorage
 from app.engine.config_loader import ConfigLoader
 from app.storage.user_storage import UserStorage
 
-ADMIN_SECRET: str = os.environ["ADMIN_SECRET"]
+ADMIN_SECRET: str = settings.auth.admin_secret
 logger.info(f"Admin secret: {ADMIN_SECRET[:5]}...")
 
 

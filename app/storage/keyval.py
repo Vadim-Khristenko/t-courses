@@ -5,6 +5,8 @@ from typing import Optional, Any
 from prometheus_client import Gauge
 from pymongo.collection import Collection
 
+from app.config import settings
+
 
 class KeyVal:
     def __init__(self):
@@ -41,10 +43,10 @@ data_records = Gauge("data_records", "Records in db", labelnames=["name"])
 
 class MongoKeyVal(KeyVal):
     def __init__(self, _id: str, collection: Collection):
-        if len(_id) > 300:
-            raise ValueError("_id must be less than 300!")
-        if len(_id) < 1:
-            raise ValueError("_id must be greater than 1!")
+        if len(_id) > settings.user.login_max_length:
+            raise ValueError(f"_id must be less than {settings.user.login_max_length}!")
+        if len(_id) < settings.user.login_min_length:
+            raise ValueError(f"_id must be greater than {settings.user.login_min_length}!")
 
         super().__init__()
         self.collection = collection
@@ -68,8 +70,8 @@ class MongoKeyVal(KeyVal):
         for key, value in data.items():
             if key not in doc:
                 data_records.labels(key).inc(1)
-            if isinstance(value, str) and len(value) > 300:
-                raise ValueError(f"Value must be less than 300: {value}")
+            if isinstance(value, str) and len(value) > settings.user.value_max_length:
+                raise ValueError(f"Value must be less than {settings.user.value_max_length}: {value}")
             data_to_set[f"values.{key}"] = value
         data_to_set["update"] = datetime.now()
         self.collection.update_one(

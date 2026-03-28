@@ -51,11 +51,14 @@ def translit(s: str) -> str:
     return "".join(translit_single(ch) for ch in s.lower().strip())
 
 
+from app.config import settings
+
+
 class LoginGenerator:
-    def __init__(self, surname: str, *, version: int = 0, prefix="t-gen"):
+    def __init__(self, surname: str, *, version: int = 0, prefix=None):
         self.surname = translit(surname.lower())
         self.version = version
-        self.prefix = prefix
+        self.prefix = prefix or settings.user.login_prefix
 
     def next(self):
         return LoginGenerator(

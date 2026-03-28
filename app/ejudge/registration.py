@@ -1,12 +1,6 @@
-import os
-
 from aiomysql import Pool
 
-EJUDGE_USER = os.environ["EJUDGE_USER"]
-EJUDGE_PASSWORD = os.environ["EJUDGE_PASSWORD"]
-
-COMMON_EJUDGE_PASSWORD = os.environ["COMMON_EJUDGE_PASSWORD"]
-CONTEST_ID = 999999
+from app.config import settings
 
 
 async def create_new_user(login: str, name: str, pool: Pool) -> int:
@@ -15,7 +9,7 @@ async def create_new_user(login: str, name: str, pool: Pool) -> int:
         try:
             await cursor.execute(
                 "INSERT INTO logins (login, pwdmethod, password) VALUES (%s, %s, %s)",
-                (login, 0, COMMON_EJUDGE_PASSWORD),
+                (login, 0, settings.database.common_ejudge_password),
             )
             await connection.commit()
         except Exception as e:
@@ -27,7 +21,7 @@ async def create_new_user(login: str, name: str, pool: Pool) -> int:
         try:
             await cursor.execute(
                 "INSERT INTO cntsregs (user_id, contest_id) VALUES (%s, %s)",
-                (user_id, CONTEST_ID),
+                (user_id, settings.database.default_contest_id),
             )
             await connection.commit()
         except Exception as err:
@@ -36,7 +30,7 @@ async def create_new_user(login: str, name: str, pool: Pool) -> int:
         try:
             await cursor.execute(
                 "INSERT INTO users (user_id, contest_id, username) VALUES (%s, %s, %s)",
-                (user_id, CONTEST_ID, name),
+                (user_id, settings.database.default_contest_id, name),
             )
             await connection.commit()
         except Exception as err:

@@ -1,5 +1,4 @@
 import asyncio
-import os
 from typing import Optional
 
 import aiohttp
@@ -7,13 +6,14 @@ from fastapi import Cookie, HTTPException
 from fastapi.responses import Response
 from starlette.requests import Request
 
-from app.engine.auth_storage import AuthStorage, COOKIE_TTL
+from app.config import settings
+from app.engine.auth_storage import AuthStorage, COOKIE_TTL, SESSION_COOKIE_NAME
 from app.storage.user import User
 from app.storage.user_storage import UserStorage
 
-SMARTCAPTCHA_SERVER_KEY = os.environ["SMARTCAPTCHA_SERVER_KEY"]
+SMARTCAPTCHA_SERVER_KEY = settings.auth.smartcaptcha_server_key
 
-SESSION_COOKIE = "session_id"
+SESSION_COOKIE = SESSION_COOKIE_NAME
 
 
 class UserSession:

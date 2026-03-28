@@ -9,14 +9,13 @@ from pymongo import MongoClient
 
 dotenv.load_dotenv("secrets/.env")
 from asyncio import Task
-from app.ejudge.registration import EJUDGE_USER, EJUDGE_PASSWORD
 from contextlib import asynccontextmanager
 import aiomysql
 import asyncio
-from app.routers.api_standings import ApiStandings
-from app.ejudge.table_component import TableComponent
 from starlette.requests import Request
 
+from app.config import settings
+from app.ejudge.table_component import TableComponent
 from app.forms.form_renderer import FormRenderer
 from app.routers.api_webutils import ApiWebutils
 
@@ -40,11 +39,8 @@ from app.routers.api_auth import ApiAuth
 from app.routers.api_ejudge import ApiEjudge
 from app.routers.web_home import WebHome
 
-MONGO_URI = os.environ["MONGO_URI"]
-APP_NAME = os.environ["APP_NAME"]
-
-mongo_client = MongoClient(MONGO_URI)
-database = mongo_client[APP_NAME]
+mongo_client = MongoClient(settings.database.mongo_uri)
+database = mongo_client[settings.database.app_name]
 
 auth_storage = AuthStorage(database["cookies"])
 user_storage = UserStorage(database)
@@ -69,11 +65,11 @@ async def lifespan(app: FastAPI):
 
     try:
         app.state.mysql_pool = await aiomysql.create_pool(
-            host="localhost",
+            host=settings.database.mysql_host,
             autocommit=True,
-            user=EJUDGE_USER,
-            password=EJUDGE_PASSWORD,
-            db="ejudge",
+            user=settings.database.mysql_user,
+            password=settings.database.mysql_password,
+            db=settings.database.mysql_db,
         )
         tasks.add(asyncio.create_task(start_load(app.state.mysql_pool)))
     except Exception as e:
@@ -104,16 +100,26 @@ app = FastAPI(
 
 config_loader = ConfigLoader()
 
-app.mount("/styles", StaticFiles(directory="resources/styles"), name="styles")
-app.mount("/scripts", StaticFiles(directory="resources/scripts"), name="scripts")
 app.mount(
-    "/images",
+    settings.static_files.styles_mount,
+    StaticFiles(directory=settings.static_files.styles_directory),
+    name="styles",
+)
+app.mount(
+    settings.static_files.scripts_mount,
+    StaticFiles(directory=settings.static_files.scripts_directory),
+    name="scripts",
+)
+app.mount(
+    settings.static_files.images_mount,
     StaticFiles(directory=config_loader.config_path / "teachers"),
     name="images",
 )
 
 app.mount(
-    "/files", StaticFiles(directory=config_loader.config_path / "files"), name="files"
+    settings.static_files.files_mount,
+    StaticFiles(directory=config_loader.config_path / "files"),
+    name="files",
 )
 
 form_renderer = FormRenderer()
@@ -162,9 +168,9 @@ def custom_openapi():
         routes=app.routes,
     )
     openapi_schema["servers"] = [
-        {"url": "https://t-edu.tech"},
-        {"url": "http://127.0.0.1:8000"},
-    ]  # 👈 custom domain here
+        {"url": settings.urls.api_domain},
+        {"url": settings.urls.local_domain},
+    ]
     app.openapi_schema = openapi_schema
     return app.openapi_schema
 

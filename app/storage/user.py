@@ -5,6 +5,7 @@ from loguru import logger
 from prometheus_client import Gauge
 from pymongo.database import Database
 
+from app.config import settings
 from app.storage.keyval import KeyVal, MongoKeyVal, data_records
 
 tag_metric = Gauge("user_by_tag", "Users by tags", labelnames=["tag"])
@@ -16,6 +17,8 @@ class User(KeyVal):
         assert (
             login.lower().strip() == login
         ), f"Login '{login}' must be lowercase & stripped!"
+        assert len(login) >= settings.user.login_min_length, f"Login must be at least {settings.user.login_min_length} characters"
+        assert len(login) <= settings.user.login_max_length, f"Login must be at most {settings.user.login_max_length} characters"
 
         self.login = login
         self.email = email
@@ -51,6 +54,8 @@ class User(KeyVal):
 
     @staticmethod
     def create_new(login: str, email: str, password: str, database: Database):
+        assert len(login) >= settings.user.login_min_length, f"Login must be at least {settings.user.login_min_length} characters"
+        assert len(login) <= settings.user.login_max_length, f"Login must be at most {settings.user.login_max_length} characters"
         database["data"].update_one(
             {"_id": login},
             {

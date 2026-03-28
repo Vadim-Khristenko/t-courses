@@ -6,14 +6,15 @@ from pathlib import Path
 from git import Repo
 from loguru import logger
 
+from app.config import settings
 from app.forms.form import Form
 from app.models.config import GlobalConfig, Course, Page
 
-CONFIGS_PATH = Path("configs")
+CONFIGS_PATH = Path(settings.config_repo.configs_path)
 
-REPO_NAME = "t-edu-config"
-MAIN_BRANCH = "main"
-REPO_FULL_PATH = f"git@github.com:DimaTomsk/{REPO_NAME}.git"
+REPO_NAME = settings.config_repo.repo_name
+MAIN_BRANCH = settings.config_repo.main_branch
+REPO_FULL_PATH = settings.config_repo.repo_full_path
 
 
 class ConfigLoader:

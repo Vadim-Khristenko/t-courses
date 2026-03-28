@@ -1,11 +1,12 @@
 from fastapi import APIRouter
 from starlette.responses import Response
 
+from app.config import settings
 from app.engine.auth_storage import AuthStorage
 from app.engine.config_loader import ConfigLoader
 from app.storage.user_storage import UserStorage
 
-DOMAIN = "https://algocourses.ru"
+DOMAIN = settings.urls.main_domain
 
 
 class ApiWebutils:

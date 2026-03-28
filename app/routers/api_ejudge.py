@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import RedirectResponse
 from typing_extensions import Annotated
 
+from app.config import settings
 from app.ejudge.web_login import perform_login
 from app.engine.auth_storage import AuthStorage
 from app.engine.config_loader import ConfigLoader
@@ -59,7 +60,7 @@ class ApiEjudge:
             return RedirectResponse(url=f"/courses/{course_name}", status_code=302)
 
         response = RedirectResponse(
-            url=f"https://ej-3.t-edu.tech/ejudge/redirect?sid={result.SID}&ejsid={result.EJSID}",
+            url=f"{settings.urls.ejudge_redirect_base}?sid={result.SID}&ejsid={result.EJSID}",
             status_code=302,
         )
         return response

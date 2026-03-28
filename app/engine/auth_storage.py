@@ -5,7 +5,10 @@ from typing import Optional
 from pymongo import ReturnDocument
 from pymongo.collection import Collection
 
-COOKIE_TTL = 60 * 60 * 24
+from app.config import settings
+
+COOKIE_TTL = settings.auth.cookie_ttl
+SESSION_COOKIE_NAME = settings.auth.session_cookie_name
 
 UPDATE_AT_FIELD = "update_at"
 

@@ -8,6 +8,7 @@ from starlette.responses import HTMLResponse, RedirectResponse
 from typing_extensions import Annotated
 
 from app.common import JinjaTemplate
+from app.config import settings
 from app.engine.auth_storage import AuthStorage
 from app.engine.config_loader import ConfigLoader
 from app.engine.renderer import CourseRenderer
@@ -16,7 +17,7 @@ from app.models.config import Course, Page, Contest
 from app.routers.authenticator import UserSession
 from app.storage.user_storage import UserStorage
 
-UI_VERSION = "21"
+UI_VERSION = settings.ui.version
 
 
 class WebHome:

@@ -1,5 +1,6 @@
 from typing import Optional
 
+from app.config import settings
 from app.engine.config_loader import ConfigLoader
 from app.models.config import Contest
 
@@ -17,7 +18,7 @@ class CourseRenderer:
 
     @classmethod
     def parse_vk_params(cls, vk_url: str) -> Optional[dict]:
-        if not "vkvideo.ru" in vk_url:
+        if settings.urls.vkvideo_domain not in vk_url:
             return None
         split = vk_url.split("video.ru/video")
         if len(split) != 2:
@@ -29,7 +30,7 @@ class CourseRenderer:
 
     @classmethod
     def parse_yt_params(cls, yt_url: str) -> Optional[dict]:
-        if not "youtu.be" in yt_url:
+        if settings.urls.youtube_short_domain not in yt_url:
             return None
         split = yt_url.split("tu.be/")
         if len(split) != 2:
